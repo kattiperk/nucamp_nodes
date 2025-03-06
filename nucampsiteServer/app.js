@@ -11,6 +11,9 @@ const connect = mongoose.connect(url, {});
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 
+const passport = require('passport');
+const authenticate = require('./authenticate');
+
 connect.then(() => console.log('Connected correctly to server'),
   err => console.log(err)
 );
@@ -40,6 +43,9 @@ app.use('/users', usersRouter);
 app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -180,5 +186,18 @@ function auth(req, res, next) {
         }
     }
 }
+
+function auth(req, res, next) {
+  console.log(req.user);
+
+  if (!req.user) {
+      const err = new Error('You are not authenticated!');
+      err.status = 401;
+      return next(err);
+  } else {
+      return next();
+  }
+}
+
 
 module.exports = app;
