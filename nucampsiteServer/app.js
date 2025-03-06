@@ -5,14 +5,17 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
 
-const url = 'mongodb://localhost:27017/nucampsite';
-const connect = mongoose.connect(url, {});
+const connect = mongoose.connect(config.mongoUrl, {});
 
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 
 const passport = require('passport');
 const authenticate = require('./authenticate');
+
+const config = require('./config');
+const url = config.mongoUrl;
+
 
 connect.then(() => console.log('Connected correctly to server'),
   err => console.log(err)
