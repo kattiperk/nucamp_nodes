@@ -6,10 +6,13 @@ const passport = require('passport');
 
 const authenticate = require('../authenticate');
 
-
+const cors = require('./cors');
 
 /* GET users listing. */
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+
+router
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get('/', cors.corsWithOptions, (req, res, next) => {
     User.find()
         // .then(users => {
         //     res.statusCode = 200;
@@ -20,7 +23,8 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
         .catch(err => next(err));
 });
 
-router.post('/signup', (req, res) => {
+router
+.post('/signup', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
   const user = new User({ username: req.body.username });
 
   User.register(user, req.body.password)
@@ -47,7 +51,8 @@ router.post('/signup', (req, res) => {
       });
 });
 
-router.post('/login', (req, res, next) => {
+router
+.post('/login', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     if(!req.session.user) {
         const authHeader = req.headers.authorization;
 
@@ -87,7 +92,8 @@ router.post('/login', (req, res, next) => {
     }
 });
 
-router.get('/logout', (req, res, next) => {
+router
+.get('/logout', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     if (req.session) {
         req.session.destroy();
         res.clearCookie('session-id');
@@ -99,7 +105,8 @@ router.get('/logout', (req, res, next) => {
     }
 });
 
-router.post('/signup', (req, res) => {
+router
+.post('/signup', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
   User.register(
       new User({username: req.body.username}),
       req.body.password,
@@ -119,13 +126,13 @@ router.post('/signup', (req, res) => {
   );
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
   res.json({success: true, status: 'You are successfully logged in!'});
 });
 
-router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
+router.post('/login', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
   const token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
